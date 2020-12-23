@@ -4,7 +4,7 @@ import './App.css'
 import Clock from 'features/ts/ReactClock'
 
 function App() {
-	return <Clock />
+	return <Clock size={200} />
 }
 
 export default App
