@@ -1,17 +1,10 @@
 import React from 'react'
 import './App.css'
 
-import BallDrag from 'features/ts/ballDrag-scratch'
+import Clock from 'features/ts/ReactClock'
 
 function App() {
-	return (
-		<BallDrag
-			rowSize= {5}
-			height={200}
-			width={200}
-			items={'what ever hi bhi sadfi ii were i is cleaver duh'.split(' ')}
-		/>
-	)
+	return <Clock />
 }
 
 export default App

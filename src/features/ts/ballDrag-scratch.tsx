@@ -4,17 +4,21 @@ import { interpolate, useSprings, animated as a } from 'react-spring'
 import { useGesture } from 'react-use-gesture'
 import { clamp } from 'lodash'
 import styled from '@emotion/styled'
-import { off } from 'process'
 
 // Returns fitting styles for dragged/idle items
 
 interface Props {
 	items: ReactChild[]
 	rowSize: number
-	height: number
-	width: number
+	rowHeight: number
+	colWidth: number
 }
-export default function Index({ items, height, width, rowSize }: Props): ReactElement {
+export default function Index({
+	items,
+	rowHeight,
+	colWidth,
+	rowSize
+}: Props): ReactElement {
 	// state
 	const order = useRef(items.map((_, index) => index)) // Store indicies as a local ref, this represents the item order
 
@@ -22,7 +26,7 @@ export default function Index({ items, height, width, rowSize }: Props): ReactEl
 	const layout = range(items.length).map(index => {
 		const row = Math.floor(index / rowSize)
 		const col = index % rowSize
-		return [width * col, height * row]
+		return [colWidth * col, rowHeight * row]
 	})
 
 	// methods
@@ -40,7 +44,6 @@ export default function Index({ items, height, width, rowSize }: Props): ReactEl
 		mouseY?: number
 		mouseX?: number
 	}) => (index: number) => {
-		console.log(index)
 		if (down && index === originalIndex)
 			return {
 				y: mouseY,
@@ -90,15 +93,18 @@ export default function Index({ items, height, width, rowSize }: Props): ReactEl
 	}
 
 	const bind = useGesture({
-		onDrag: ({ args: [originalIndex], down, xy: [x, y] }) => {
+		onDrag: ({ args: [originalIndex], down, movement: [deltaX, deltaY] }) => {
 			const curIndex = order.current.indexOf(originalIndex)
-			const col = clamp(Math.floor(x / width), 0, rowSize -1)
-			const row = clamp(Math.floor(y / height), 0, Math.floor(items.length / rowSize))
+			const [initialX, initialY] = layout[curIndex]
+			const [x, y] = [initialX + deltaX, initialY + deltaY]
+
+			const col = clamp(Math.floor(x / colWidth), 0, rowSize - 1)
+			const row = clamp(
+				Math.floor(y / rowHeight),
+				0,
+				Math.floor(items.length / rowSize)
+			)
 			const index = row * rowSize + col
-			console.log('row', row)
-			console.log('rowSize', rowSize)
-			console.log('col', col)
-			console.log('col', col)
 
 			const newOrder = reinsert(order.current, curIndex, index)
 
@@ -109,8 +115,8 @@ export default function Index({ items, height, width, rowSize }: Props): ReactEl
 					down,
 					originalIndex,
 					curIndex,
-					mouseX: x - 45,
-					mouseY: y - 45
+					mouseX: x,
+					mouseY: y
 				})
 			)
 			if (!down) order.current = newOrder
@@ -145,17 +151,5 @@ export default function Index({ items, height, width, rowSize }: Props): ReactEl
 
 const Animated = styled(a.div)`
 	position: absolute;
-	width: 90px;
-	height: 90px;
-	overflow: visible;
 	pointer-events: auto;
-	transform-origin: 50% 50% 0px;
-	border-radius: 5px;
-	color: white;
-	line-height: 90px;
-	padding-left: 32px;
-	font-size: 14.5px;
-	background: lightblue;
-	text-transform: uppercase;
-	letter-spacing: 2px;
 `
